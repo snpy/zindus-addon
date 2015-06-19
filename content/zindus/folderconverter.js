@@ -21,31 +21,30 @@
  *
  * ***** END LICENSE BLOCK *****/
 
-FolderConverter.PREFIX_CLASS_NONE     = 1;
+FolderConverter.PREFIX_CLASS_NONE = 1;
 FolderConverter.PREFIX_CLASS_INTERNAL = 2;
-FolderConverter.PREFIX_CLASS_PRIMARY  = 3;
-FolderConverter.PREFIX_CLASS_SHARED   = 4;
+FolderConverter.PREFIX_CLASS_PRIMARY = 3;
+FolderConverter.PREFIX_CLASS_SHARED = 4;
 
-FolderConverter.PREFIX_PRIMARY_ACCOUNT   = APP_NAME + "/";
-FolderConverter.PREFIX_FOREIGN_READONLY  = APP_NAME + "-";
+FolderConverter.PREFIX_PRIMARY_ACCOUNT = APP_NAME + "/";
+FolderConverter.PREFIX_FOREIGN_READONLY = APP_NAME + "-";
 FolderConverter.PREFIX_FOREIGN_READWRITE = APP_NAME + "+";
-FolderConverter.PREFIX_INTERNAL          = APP_NAME + "_";
+FolderConverter.PREFIX_INTERNAL = APP_NAME + "_";
 
-function FolderConverter()
-{
-	this.m_bimap_pab = new BiMap(              [FORMAT_TB,           FORMAT_ZM,          FORMAT_GD ],
-	                                           [TB_PAB,              ZM_FOLDER_CONTACTS, GD_PAB    ]);
+function FolderConverter() {
+    this.m_bimap_pab = new BiMap([FORMAT_TB, FORMAT_ZM, FORMAT_GD],
+        [TB_PAB, ZM_FOLDER_CONTACTS, GD_PAB]);
 
-	this.m_bimap_emailed_contacts = new BiMap( [FORMAT_TB,           FORMAT_ZM                  ],
-	                                           [TB_EMAILED_CONTACTS, ZM_FOLDER_EMAILED_CONTACTS ]);
+    this.m_bimap_emailed_contacts = new BiMap([FORMAT_TB, FORMAT_ZM],
+        [TB_EMAILED_CONTACTS, ZM_FOLDER_EMAILED_CONTACTS]);
 
-	this.m_prefix_length = FolderConverter.PREFIX_PRIMARY_ACCOUNT.length;  // all prefixes have the same length
+    this.m_prefix_length = FolderConverter.PREFIX_PRIMARY_ACCOUNT.length;  // all prefixes have the same length
 
-	this.m_localised_pab              = null;  // the localised equivalent of "Personal Address Book" eg "Adresses Personnelles"
-	this.m_localised_emailed_contacts = null;  // the localised equivalent of "Emailed Contacts"      eg "Personnes contactées par mail"
-	this.m_gd_account_email_address   = null;
+    this.m_localised_pab = null;  // the localised equivalent of "Personal Address Book" eg "Adresses Personnelles"
+    this.m_localised_emailed_contacts = null;  // the localised equivalent of "Emailed Contacts"      eg "Personnes contactï¿½es par mail"
+    this.m_gd_account_email_address = null;
 
-	this.m_logger = newLogger("FolderConverter");
+    this.m_logger = newLogger("FolderConverter");
 }
 
 // This method converts to/from ATTR_NAME attributes in Tb and Zm maps.
@@ -55,46 +54,47 @@ function FolderConverter()
 // For Tb, the map name must be converted to a public-facing name (to handle TB_PAB and TB_EMAILED_CONTACTS)
 // The method has to take a zfi to distinguish between folders that the in the primary account vs foreign folders
 //
-FolderConverter.prototype.convertForMap = function(format_to, format_from, zfi)
-{
-	var ret;
+FolderConverter.prototype.convertForMap = function (format_to, format_from, zfi) {
+    var ret;
 
-	zinAssert(arguments.length == 3); // catch programming errors
-	zinAssertAndLog(typeof(zfi) == 'object', " zfi ain't an FeedItem object: " + zfi);
+    zinAssert(arguments.length == 3); // catch programming errors
+    zinAssertAndLog(typeof(zfi) == 'object', " zfi ain't an FeedItem object: " + zfi);
 
-	zinAssertAndLog((zfi.type() == FeedItem.TYPE_FL && !zfi.isForeign()) ||
-	                 zfi.type() == FeedItem.TYPE_SF ||
-					 zfi.type() == FeedItem.TYPE_GG,
-	                  function () { return "can't convertForMap zfi: " + zfi.toString(); } );
+    zinAssertAndLog((zfi.type() == FeedItem.TYPE_FL && !zfi.isForeign()) ||
+        zfi.type() == FeedItem.TYPE_SF ||
+        zfi.type() == FeedItem.TYPE_GG,
+        function () {
+            return "can't convertForMap zfi: " + zfi.toString();
+        });
 
-	var name = zfi.get(FeedItem.ATTR_NAME);
+    var name = zfi.get(FeedItem.ATTR_NAME);
 
-	if (zfi.type() == FeedItem.TYPE_FL && this.m_bimap_pab.lookup(format_from, null) == name)
-		ret = this.m_bimap_pab.lookup(format_to, null);
-	else if (zfi.type() == FeedItem.TYPE_FL && this.m_bimap_emailed_contacts.lookup(format_from, null) == name)
-		ret = this.m_bimap_emailed_contacts.lookup(format_to, null);  // this will assert if FORMAT_GD ... as it should ...
-	else if (format_from == format_to)
-		ret = name;
-	else if (format_from == FORMAT_ZM && format_to == FORMAT_TB)
-		ret = this.tb_from_zm_zfi(zfi) + name;
-	else if (format_from == FORMAT_GD && format_to == FORMAT_TB)
-		ret = this.tb_from_gd_zfi(zfi);
-	else
-	{
-		zinAssertAndLog(this.prefixClass(name) != FolderConverter.PREFIX_CLASS_NONE, name);
-		ret = name.substring(this.m_prefix_length)
+    if (zfi.type() == FeedItem.TYPE_FL && this.m_bimap_pab.lookup(format_from, null) == name) {
+        ret = this.m_bimap_pab.lookup(format_to, null);
+    } else if (zfi.type() == FeedItem.TYPE_FL && this.m_bimap_emailed_contacts.lookup(format_from, null) == name) {
+        ret = this.m_bimap_emailed_contacts.lookup(format_to, null);
+    }// this will assert if FORMAT_GD ... as it should ...
+    else if (format_from == format_to) {
+        ret = name;
+    } else if (format_from == FORMAT_ZM && format_to == FORMAT_TB) {
+        ret = this.tb_from_zm_zfi(zfi) + name;
+    } else if (format_from == FORMAT_GD && format_to == FORMAT_TB) {
+        ret = this.tb_from_gd_zfi(zfi);
+    } else {
+        zinAssertAndLog(this.prefixClass(name) != FolderConverter.PREFIX_CLASS_NONE, name);
+        ret = name.substring(this.m_prefix_length)
 
-		if (format_to == FORMAT_GD) {
-			// return what's to the right of the separator
-			let separator = ret.indexOf(GD_GR_AS_AB_SEPARATOR);
-			zinAssert(separator >= 0);
-			ret = ret.substring(separator + 1);
-		}
-	}
+        if (format_to == FORMAT_GD) {
+            // return what's to the right of the separator
+            let separator = ret.indexOf(GD_GR_AS_AB_SEPARATOR);
+            zinAssert(separator >= 0);
+            ret = ret.substring(separator + 1);
+        }
+    }
 
-	// this.m_logger.debug("convertForMap: name: " + name + " from: " + format_from +" to: " + format_to + " returns: " + ret);
+    // this.m_logger.debug("convertForMap: name: " + name + " from: " + format_from +" to: " + format_to + " returns: " + ret);
 
-	return ret;
+    return ret;
 }
 
 // This method caters for the items in the Thunderbird map that correspond to "reserved" ids in Zimbra's map -
@@ -102,122 +102,119 @@ FolderConverter.prototype.convertForMap = function(format_to, format_from, zfi)
 // are for internal-use only.  This routine returns their thunderbird addressbook names, and for all other ids
 // returns the item's ATTR_NAME.
 
-FolderConverter.prototype.convertForPublic = function(format_to, format_from, zfi)
-{
-	// catch programming errors
-	zinAssertAndLog(arguments.length == 3 && this.m_localised_pab, function () {
-			return " arguments.length: " + arguments.length + " m_localised_pab: " + this.m_localised_pab + " zfi: " + zfi.toString(); });
+FolderConverter.prototype.convertForPublic = function (format_to, format_from, zfi) {
+    // catch programming errors
+    zinAssertAndLog(arguments.length == 3 && this.m_localised_pab, function () {
+        return " arguments.length: " + arguments.length + " m_localised_pab: " + this.m_localised_pab + " zfi: " + zfi.toString();
+    });
 
-	var ret = this.convertForMap(format_to, format_from, zfi);
+    var ret = this.convertForMap(format_to, format_from, zfi);
 
-	if (format_to == FORMAT_TB)
-	{
-		if (ret == TB_PAB)
-			ret = this.m_localised_pab;
-		else if (ret == TB_EMAILED_CONTACTS)
-			ret = FolderConverter.PREFIX_PRIMARY_ACCOUNT +
-			              (this.m_localised_emailed_contacts ? this.m_localised_emailed_contacts : ZM_FOLDER_EMAILED_CONTACTS);
-	}
+    if (format_to == FORMAT_TB) {
+        if (ret == TB_PAB) {
+            ret = this.m_localised_pab;
+        } else if (ret == TB_EMAILED_CONTACTS) {
+            ret = FolderConverter.PREFIX_PRIMARY_ACCOUNT +
+            (this.m_localised_emailed_contacts ? this.m_localised_emailed_contacts : ZM_FOLDER_EMAILED_CONTACTS);
+        }
+    }
 
-	zinAssert(ret);
+    zinAssert(ret);
 
-	return ret;
+    return ret;
 }
 
-FolderConverter.prototype.localised_pab = function()
-{
-	if (arguments.length == 1)
-	{
-		this.m_localised_pab = arguments[0];
+FolderConverter.prototype.localised_pab = function () {
+    if (arguments.length == 1) {
+        this.m_localised_pab = arguments[0];
 
-		this.m_logger.debug("localised_pab: set to: " + this.m_localised_pab);
-	}
+        this.m_logger.debug("localised_pab: set to: " + this.m_localised_pab);
+    }
 
-	return this.m_localised_pab;
+    return this.m_localised_pab;
 }
 
-FolderConverter.prototype.localised_emailed_contacts = function()
-{
-	if (arguments.length == 1)
-	{
-		this.m_localised_emailed_contacts = arguments[0];
+FolderConverter.prototype.localised_emailed_contacts = function () {
+    if (arguments.length == 1) {
+        this.m_localised_emailed_contacts = arguments[0];
 
-		this.m_logger.debug("localised_emailed_contacts: set to: " + this.m_localised_emailed_contacts);
-	}
+        this.m_logger.debug("localised_emailed_contacts: set to: " + this.m_localised_emailed_contacts);
+    }
 
-	return this.m_localised_emailed_contacts;
+    return this.m_localised_emailed_contacts;
 }
 
-FolderConverter.prototype.gd_account_email_address = function()
-{
-	if (arguments.length == 1)
-	{
-		this.m_gd_account_email_address = arguments[0];
+FolderConverter.prototype.gd_account_email_address = function () {
+    if (arguments.length == 1) {
+        this.m_gd_account_email_address = arguments[0];
 
-		this.m_logger.debug("gd_account_email_address: set to: " + this.m_gd_account_email_address);
-	}
+        this.m_logger.debug("gd_account_email_address: set to: " + this.m_gd_account_email_address);
+    }
 
-	return this.m_gd_account_email_address;
+    return this.m_gd_account_email_address;
 }
 
-FolderConverter.prototype.tb_from_zm_zfi = function(zfi)
-{
-	var ret;
+FolderConverter.prototype.tb_from_zm_zfi = function (zfi) {
+    var ret;
 
-	zinAssertAndLog((zfi.type() == FeedItem.TYPE_FL && !zfi.isForeign()) || zfi.type() == FeedItem.TYPE_SF,
-	                  function () { return "can't tb_from_zm_zfi zfi: " + zfi.toString(); });
+    zinAssertAndLog((zfi.type() == FeedItem.TYPE_FL && !zfi.isForeign()) || zfi.type() == FeedItem.TYPE_SF,
+        function () {
+            return "can't tb_from_zm_zfi zfi: " + zfi.toString();
+        });
 
-	if (zfi.type() == FeedItem.TYPE_FL)
-		ret = FolderConverter.PREFIX_PRIMARY_ACCOUNT;
-	else
-	{
-		let perm = zmPermFromZfi(zfi.getOrNull(FeedItem.ATTR_PERM));
+    if (zfi.type() == FeedItem.TYPE_FL) {
+        ret = FolderConverter.PREFIX_PRIMARY_ACCOUNT;
+    } else {
+        let perm = zmPermFromZfi(zfi.getOrNull(FeedItem.ATTR_PERM));
 
-		if (perm & ZM_PERM_WRITE)
-			ret = FolderConverter.PREFIX_FOREIGN_READWRITE;
-		else if (perm & ZM_PERM_READ)
-			ret = FolderConverter.PREFIX_FOREIGN_READONLY;
-		else
-			zinAssertAndLog(false, "unable to tb_from_zm_zfi zfi: " + zfi.toString());
-	}
+        if (perm & ZM_PERM_WRITE) {
+            ret = FolderConverter.PREFIX_FOREIGN_READWRITE;
+        } else if (perm & ZM_PERM_READ) {
+            ret = FolderConverter.PREFIX_FOREIGN_READONLY;
+        } else {
+            zinAssertAndLog(false, "unable to tb_from_zm_zfi zfi: " + zfi.toString());
+        }
+    }
 
-	return ret;
+    return ret;
 }
 
-FolderConverter.prototype.tb_from_gd_zfi = function(zfi)
-{
-	var ret;
+FolderConverter.prototype.tb_from_gd_zfi = function (zfi) {
+    var ret;
 
-	zinAssertAndLog(zfi.type() == FeedItem.TYPE_GG, function () { return "expected TYPE_GG: zfi: " + zfi.toString(); });
+    zinAssertAndLog(zfi.type() == FeedItem.TYPE_GG, function () {
+        return "expected TYPE_GG: zfi: " + zfi.toString();
+    });
 
-	let name = zfi.get(FeedItem.ATTR_NAME);
+    let name = zfi.get(FeedItem.ATTR_NAME);
 
-	if (zfi.isPresent(FeedItem.ATTR_GGSG))
-		ret = this.tb_ab_name_for_gd_group("/", PerLocaleStatic.translation_of(name));
-	else {
-		zinAssertAndLog(this.prefixClass(name) == FolderConverter.PREFIX_CLASS_NONE, name);
-		ret = this.tb_ab_name_for_gd_group("/", name);
-	}
+    if (zfi.isPresent(FeedItem.ATTR_GGSG)) {
+        ret = this.tb_ab_name_for_gd_group("/", PerLocaleStatic.translation_of(name));
+    } else {
+        zinAssertAndLog(this.prefixClass(name) == FolderConverter.PREFIX_CLASS_NONE, name);
+        ret = this.tb_ab_name_for_gd_group("/", name);
+    }
 
-	return ret;
+    return ret;
 }
 
-FolderConverter.prototype.tb_ab_name_for_gd_group = function(separator, group_name)
-{
-	return APP_NAME + separator + this.gd_account_email_address() + GD_GR_AS_AB_SEPARATOR + group_name;
+FolderConverter.prototype.tb_ab_name_for_gd_group = function (separator, group_name) {
+    return APP_NAME + separator + this.gd_account_email_address() + GD_GR_AS_AB_SEPARATOR + group_name;
 }
 
-FolderConverter.prototype.prefixClass = function(str)
-{
-	var ret    = FolderConverter.PREFIX_CLASS_NONE;
-	var prefix = str.substring(0, this.m_prefix_length);
+FolderConverter.prototype.prefixClass = function (str) {
+    var ret = FolderConverter.PREFIX_CLASS_NONE;
+    var prefix = str.substring(0, this.m_prefix_length);
 
-	if (prefix == FolderConverter.PREFIX_PRIMARY_ACCOUNT)        ret = FolderConverter.PREFIX_CLASS_PRIMARY;
-	else if (prefix == FolderConverter.PREFIX_INTERNAL)          ret = FolderConverter.PREFIX_CLASS_INTERNAL;
-	else if (prefix == FolderConverter.PREFIX_FOREIGN_READONLY)  ret = FolderConverter.PREFIX_CLASS_SHARED;
-	else if (prefix == FolderConverter.PREFIX_FOREIGN_READWRITE) ret = FolderConverter.PREFIX_CLASS_SHARED;
+    if (prefix == FolderConverter.PREFIX_PRIMARY_ACCOUNT) {
+        ret = FolderConverter.PREFIX_CLASS_PRIMARY;
+    } else if (prefix == FolderConverter.PREFIX_INTERNAL) {
+        ret = FolderConverter.PREFIX_CLASS_INTERNAL;
+    } else if (prefix == FolderConverter.PREFIX_FOREIGN_READONLY) {
+        ret = FolderConverter.PREFIX_CLASS_SHARED;
+    } else if (prefix == FolderConverter.PREFIX_FOREIGN_READWRITE) ret = FolderConverter.PREFIX_CLASS_SHARED;
 
-	// this.m_logger.debug("prefixClass: str: " + str + " prefix: " + prefix + " returns: " + ret);
+    // this.m_logger.debug("prefixClass: str: " + str + " prefix: " + prefix + " returns: " + ret);
 
-	return ret;
+    return ret;
 }

@@ -22,36 +22,36 @@
  * ***** END LICENSE BLOCK *****/
 
 var ObserverService = {
-	TOPIC_PREFERENCE_CHANGE : "ZindusPreferenceChange",
-	service : function() {
-		return Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
-	},
-	isRegistered : function(topic) {
-		var enumerator = this.service().enumerateObservers(topic);
-		var count      = 0;
+    TOPIC_PREFERENCE_CHANGE: "ZindusPreferenceChange",
+    service:                 function () {
+        return Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
+    },
+    isRegistered:            function (topic) {
+        var enumerator = this.service().enumerateObservers(topic);
+        var count = 0;
 
-		while (enumerator.hasMoreElements()) {
-			try {
-				let o = enumerator.getNext().QueryInterface(Ci.nsIObserver);
-				// dump("observerServiceIsRegistered: o: " + aToString(o) + "\n");
-				count++;
-			}
-			catch (e) {
-				zinAlert('text.alert.title', "exception while enumerating: e: " + e);
-			}
-		}
+        while (enumerator.hasMoreElements()) {
+            try {
+                let o = enumerator.getNext().QueryInterface(Ci.nsIObserver);
+                // dump("observerServiceIsRegistered: o: " + aToString(o) + "\n");
+                count++;
+            }
+            catch (e) {
+                zinAlert('text.alert.title', "exception while enumerating: e: " + e);
+            }
+        }
 
-		return count > 0;
-	},
-	notify : function(topic, subject, data) {
-		this.service().notifyObservers(subject, topic, data);
-	},
-	register : function(obj, topic) {
-		logger().debug("ObserverService.register: " + topic);
-		this.service().addObserver(obj, topic, false);
-	},
-	unregister : function(obj, topic) {
-		logger().debug("ObserverService.unregister: " + topic);
-		this.service().removeObserver(obj, topic);
-	}
+        return count > 0;
+    },
+    notify:                  function (topic, subject, data) {
+        this.service().notifyObservers(subject, topic, data);
+    },
+    register:                function (obj, topic) {
+        logger().debug("ObserverService.register: " + topic);
+        this.service().addObserver(obj, topic, false);
+    },
+    unregister:              function (obj, topic) {
+        logger().debug("ObserverService.unregister: " + topic);
+        this.service().removeObserver(obj, topic);
+    }
 };

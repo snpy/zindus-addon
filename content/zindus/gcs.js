@@ -24,18 +24,17 @@
 // Gcs == Global Converged State
 //
 
-var eGcs = new ZinEnum( 'win', 'conflict' );
+var eGcs = new ZinEnum('win', 'conflict');
 
-function Gcs(sourceid, state)
-{
-	zinAssert(isValidSourceId(sourceid) && eGcs.isPresent(state));
+function Gcs(sourceid, state) {
+    zinAssert(isValidSourceId(sourceid) && eGcs.isPresent(state));
 
-	this.sourceid = sourceid;
-	this.state    = state;
+    this.sourceid = sourceid;
+    this.state = state;
 }
 
 Gcs.prototype = {
-	toString : function() {
-		return  "winner: " + this.sourceid + " state: " + eGcs.keyFromValue(this.state);
-	}
+    toString: function () {
+        return "winner: " + this.sourceid + " state: " + eGcs.keyFromValue(this.state);
+    }
 };

@@ -27,91 +27,98 @@
 // - m_properties contains properties associated with each of the zid's in the array.
 //
 
-function ZidBag()
-{
-	this.a_zid        = new Array();
-	this.m_index      = 0;
-	this.m_properties = new Object();
+function ZidBag() {
+    this.a_zid = new Array();
+    this.m_index = 0;
+    this.m_properties = new Object();
 }
 
 ZidBag.a_valid_properties = newObjectWithKeys(eAccount.url, 'SyncToken');
 
 ZidBag.prototype = {
-toString : function() {
-	var ret = "m_index: " + this.m_index + " a_zid: ";
+    toString:      function () {
+        var ret = "m_index: " + this.m_index + " a_zid: ";
 
-	zinAssert(this.a_zid.length == aToLength(this.m_properties));
+        zinAssert(this.a_zid.length == aToLength(this.m_properties));
 
-	for (var i = 0; i < this.a_zid.length; i++) {
-		let zid = this.a_zid[i];
+        for (var i = 0; i < this.a_zid.length; i++) {
+            let zid = this.a_zid[i];
 
-		ret += "\n " + i + ": " + strPadTo(zid, 36);
+            ret += "\n " + i + ": " + strPadTo(zid, 36);
 
-		for (var j in this.m_properties[zid])
-			ret += " " + j + ": " + this.get(zid, j);
-	}
+            for (var j in this.m_properties[zid])
+                ret += " " + j + ": " + this.get(zid, j);
+        }
 
-	return ret;
-},
-push : function(zid) {
-	zinAssertAndLog(!(zid in this.m_properties), "zid: " + zid);
+        return ret;
+    },
+    push:          function (zid) {
+        zinAssertAndLog(!(zid in this.m_properties), "zid: " + zid);
 
-	this.a_zid.push(zid);
+        this.a_zid.push(zid);
 
-	this.m_properties[zid] = new Object();
-},
-set : function(zid, key, value) {
-	this.assert(zid, key);
+        this.m_properties[zid] = new Object();
+    },
+    set:           function (zid, key, value) {
+        this.assert(zid, key);
 
-	this.m_properties[zid][key] = value;
-},
-get : function(zid, key) {
-	zinAssertAndLog((key in this.m_properties[zid]), function() { return "zid: " + zid + " key: " + key; } );
-	this.assert(zid, key);
+        this.m_properties[zid][key] = value;
+    },
+    get:           function (zid, key) {
+        zinAssertAndLog((key in this.m_properties[zid]), function () {
+            return "zid: " + zid + " key: " + key;
+        });
+        this.assert(zid, key);
 
-	return this.m_properties[zid][key];
-},
-isPresent : function(zid) {
-	return (zid in this.m_properties);
-},
-assert : function(zid, key) {
-	zinAssertAndLog((zid in this.m_properties), function() { return "zid: " + zid; });
-	zinAssertAndLog((key in ZidBag.a_valid_properties), function () { return "zid: " + zid + " key: " + key; });
-},
+        return this.m_properties[zid][key];
+    },
+    isPresent:     function (zid) {
+        return (zid in this.m_properties);
+    },
+    assert:        function (zid, key) {
+        zinAssertAndLog((zid in this.m_properties), function () {
+            return "zid: " + zid;
+        });
+        zinAssertAndLog((key in ZidBag.a_valid_properties), function () {
+            return "zid: " + zid + " key: " + key;
+        });
+    },
 
 // This method can be called three ways:
 // - no arguments: shorthand for calling the method with an argument of this.m_index
 // - number:       the argument is an index into the array, lookup the zid, then return the soapURL
 // - string:       the argument is a zid, return the soapURL
 //
-soapUrl : function(arg) {
-	var ret;
+    soapUrl:       function (arg) {
+        var ret;
 
-	if (arguments.length  == 0)
-		ret = this.soapUrl(this.m_index);
-	else if (typeof(arg) == 'number')
-		ret = this.soapUrl(this.a_zid[arg]);
-	else if (typeof(arg) == 'string' || arg == null)
-		ret = this.get(arg, eAccount.url);
-	else
-		zinAssertAndLog(false, "invalid argument: " + arg);
+        if (arguments.length == 0) {
+            ret = this.soapUrl(this.m_index);
+        } else if (typeof(arg) == 'number') {
+            ret = this.soapUrl(this.a_zid[arg]);
+        } else if (typeof(arg) == 'string' || arg == null) {
+            ret = this.get(arg, eAccount.url);
+        } else {
+            zinAssertAndLog(false, "invalid argument: " + arg);
+        }
 
-	return ret;
-},
-zimbraId : function(arg) {
-	var ret;
+        return ret;
+    },
+    zimbraId:      function (arg) {
+        var ret;
 
-	if (arguments.length  == 0)
-		ret = this.a_zid[this.m_index];
-	else if (typeof(arg) == 'number')
-		ret = this.a_zid[arg];
-	else
-		zinAssert(false);
+        if (arguments.length == 0) {
+            ret = this.a_zid[this.m_index];
+        } else if (typeof(arg) == 'number') {
+            ret = this.a_zid[arg];
+        } else {
+            zinAssert(false);
+        }
 
-	return ret;
-},
-isPrimaryUser : function() {
-	return this.m_index == 0;
-}
+        return ret;
+    },
+    isPrimaryUser: function () {
+        return this.m_index == 0;
+    }
 };
 

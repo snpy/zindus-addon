@@ -24,58 +24,58 @@
 // lso == Last Sync Object
 //
 
-function Lso(arg)
-{
-	var i;
-	this.m_properties = new Object();
+function Lso(arg) {
+    var i;
+    this.m_properties = new Object();
 
-	for (i = 0; i < Lso.aPartsAll.length; i++)
-		this.m_properties[Lso.aPartsAll[i]] = "";
+    for (i = 0; i < Lso.aPartsAll.length; i++)
+        this.m_properties[Lso.aPartsAll[i]] = "";
 
-	switch (typeof(arg))
-	{
-		case 'object': // populate properties from the (ms, md etc) attributes of a zfi object
-			var zfi = arg;
-			zinAssert(zfi);
-			for (i = 0; i < Lso.aPartsZfi.length; i++)
-				if (zfi.isPresent(Lso.aPartsZfi[i]))
-					this.m_properties[Lso.aPartsZfi[i]] = zfi.get(Lso.aPartsZfi[i]);
-			break;
-		case 'string': // populate properties from a FeedItem.ATTR_LS string
-			var a = arg.split("#");
-			zinAssert(a.length == Lso.aPartsAll.length);
-			for (i = 0; i < Lso.aPartsAll.length; i++)
-				if (a[i].length > 0)
-					this.m_properties[Lso.aPartsAll[i]] = a[i];
-			break;
-		default:
-			zinAssert(false);
-	}
+    switch (typeof(arg)) {
+        case 'object': // populate properties from the (ms, md etc) attributes of a zfi object
+            var zfi = arg;
+            zinAssert(zfi);
+            for (i = 0; i < Lso.aPartsZfi.length; i++)
+                if (zfi.isPresent(Lso.aPartsZfi[i])) {
+                    this.m_properties[Lso.aPartsZfi[i]] = zfi.get(Lso.aPartsZfi[i]);
+                }
+            break;
+        case 'string': // populate properties from a FeedItem.ATTR_LS string
+            var a = arg.split("#");
+            zinAssert(a.length == Lso.aPartsAll.length);
+            for (i = 0; i < Lso.aPartsAll.length; i++)
+                if (a[i].length > 0) {
+                    this.m_properties[Lso.aPartsAll[i]] = a[i];
+                }
+            break;
+        default:
+            zinAssert(false);
+    }
 }
 
-Lso.aPartsZfi = [ FeedItem.ATTR_CS, FeedItem.ATTR_MS, FeedItem.ATTR_REV, FeedItem.ATTR_DEL ];
-Lso.aPartsAll = [ FeedItem.ATTR_VER ].concat(Lso.aPartsZfi);
+Lso.aPartsZfi = [FeedItem.ATTR_CS, FeedItem.ATTR_MS, FeedItem.ATTR_REV, FeedItem.ATTR_DEL];
+Lso.aPartsAll = [FeedItem.ATTR_VER].concat(Lso.aPartsZfi);
 
 // MS and REV drive  change detection for zm
 // REV        drives change detection for gd
 // CS         drives change detection for tb
 //
-Lso.prototype.compareFormat = function()
-{
-	var ret = null;
+Lso.prototype.compareFormat = function () {
+    var ret = null;
 
-	if (this.m_properties[FeedItem.ATTR_CS] != "")
-		ret = FORMAT_TB;
-	else if (this.m_properties[FeedItem.ATTR_MS] != "")
-		ret = FORMAT_ZM;
-	else if (this.m_properties[FeedItem.ATTR_REV] != "")
-		ret = FORMAT_GD;
-	else
-		zinAssertAndLog(false, "m_properties: " + aToString(this.m_properties));
+    if (this.m_properties[FeedItem.ATTR_CS] != "") {
+        ret = FORMAT_TB;
+    } else if (this.m_properties[FeedItem.ATTR_MS] != "") {
+        ret = FORMAT_ZM;
+    } else if (this.m_properties[FeedItem.ATTR_REV] != "") {
+        ret = FORMAT_GD;
+    } else {
+        zinAssertAndLog(false, "m_properties: " + aToString(this.m_properties));
+    }
 
-	// logger().debug("Lso.compareFormat: blah: returns: " + ret);
+    // logger().debug("Lso.compareFormat: blah: returns: " + ret);
 
-	return ret;
+    return ret;
 }
 
 // returns 0 ==> the properties in this object match the corresponding properties in the zfi.
@@ -92,105 +92,98 @@ Lso.prototype.compareFormat = function()
 //      the DEL attribute is different from the DEL part of the ls attribute
 // returns -1 otherwise
 //
-Lso.prototype.compare = function(zfi)
-{
-	var isExactMatch = true;
-	var isGreaterThan = null;
-	var aParts = Lso.aPartsZfi;
-	var ret;
+Lso.prototype.compare = function (zfi) {
+    var isExactMatch = true;
+    var isGreaterThan = null;
+    var aParts = Lso.aPartsZfi;
+    var ret;
 
-	for (var i = 0; i < aParts.length && isExactMatch; i++)
-	{
-		// logger.debug("blah: Lso.[i]: " + aParts[i] + " lhs: " + Lso.normalise(zfi, aParts[i]) + " rhs: " + this.m_properties[aParts[i]]);
+    for (var i = 0; i < aParts.length && isExactMatch; i++) {
+        // logger.debug("blah: Lso.[i]: " + aParts[i] + " lhs: " + Lso.normalise(zfi, aParts[i]) + " rhs: " + this.m_properties[aParts[i]]);
 
-		isExactMatch = (Lso.normalise(zfi, aParts[i]) == this.m_properties[aParts[i]]);
-	}
+        isExactMatch = (Lso.normalise(zfi, aParts[i]) == this.m_properties[aParts[i]]);
+    }
 
-	if (!isExactMatch)
-	{
-		var MS  = FeedItem.ATTR_MS;
-		var CS  = FeedItem.ATTR_CS;
-		var REV = FeedItem.ATTR_REV;
-		var DEL = FeedItem.ATTR_DEL;
+    if (!isExactMatch) {
+        var MS = FeedItem.ATTR_MS;
+        var CS = FeedItem.ATTR_CS;
+        var REV = FeedItem.ATTR_REV;
+        var DEL = FeedItem.ATTR_DEL;
 
-		if (this.m_properties[MS] != "") zinAssert(this.m_properties[CS] == "");
-		if (this.m_properties[CS] != "") zinAssert(this.m_properties[MS] == "");
+        if (this.m_properties[MS] != "") zinAssert(this.m_properties[CS] == "");
+        if (this.m_properties[CS] != "") zinAssert(this.m_properties[MS] == "");
 
-		var format = this.compareFormat();
+        var format = this.compareFormat();
 
-		switch (format)
-		{
-			case FORMAT_TB:
-				isGreaterThan = (Lso.normalise(zfi, CS) != TBCARD_CHECKSUM_BACKWARDS) &&
-				                 ((Lso.normalise(zfi, CS)  != this.m_properties[CS]) ||
-					  			  (Lso.normalise(zfi, DEL) != this.m_properties[DEL]));
-				break;
-			case FORMAT_ZM:
-				isGreaterThan =
-				            (Number(Lso.normalise(zfi, MS))  > Number(this.m_properties[MS]))  ||
-			                (Number(Lso.normalise(zfi, REV)) > Number(this.m_properties[REV])) ||
-			                (
-								(Lso.normalise(zfi, MS) == this.m_properties[MS]) &&
-			                  	(Lso.normalise(zfi, REV) == this.m_properties[REV]) &&
-					  			(Lso.normalise(zfi, DEL) != this.m_properties[DEL])
-							);
-				break;
-			case FORMAT_GD:
-				isGreaterThan =
-			                (Lso.normalise(zfi, REV) > this.m_properties[REV]) ||
-			                (
-			                  	(Lso.normalise(zfi, REV) == this.m_properties[REV]) &&
-					  			(Lso.normalise(zfi, DEL) != this.m_properties[DEL])
-							);
-				break;
-			default:
-				zinAssert(false, "unmatched case: " + format);
-		}
-	}
+        switch (format) {
+            case FORMAT_TB:
+                isGreaterThan = (Lso.normalise(zfi, CS) != TBCARD_CHECKSUM_BACKWARDS) &&
+                ((Lso.normalise(zfi, CS) != this.m_properties[CS]) ||
+                (Lso.normalise(zfi, DEL) != this.m_properties[DEL]));
+                break;
+            case FORMAT_ZM:
+                isGreaterThan =
+                    (Number(Lso.normalise(zfi, MS)) > Number(this.m_properties[MS])) ||
+                    (Number(Lso.normalise(zfi, REV)) > Number(this.m_properties[REV])) ||
+                    (
+                    (Lso.normalise(zfi, MS) == this.m_properties[MS]) &&
+                    (Lso.normalise(zfi, REV) == this.m_properties[REV]) &&
+                    (Lso.normalise(zfi, DEL) != this.m_properties[DEL])
+                    );
+                break;
+            case FORMAT_GD:
+                isGreaterThan =
+                    (Lso.normalise(zfi, REV) > this.m_properties[REV]) ||
+                    (
+                    (Lso.normalise(zfi, REV) == this.m_properties[REV]) &&
+                    (Lso.normalise(zfi, DEL) != this.m_properties[DEL])
+                    );
+                break;
+            default:
+                zinAssert(false, "unmatched case: " + format);
+        }
+    }
 
-	if (isExactMatch)
-		ret = 0;
-	else if (isGreaterThan)
-		ret = 1;
-	else
-		ret = -1;
+    if (isExactMatch) {
+        ret = 0;
+    } else if (isGreaterThan) {
+        ret = 1;
+    } else {
+        ret = -1;
+    }
 
-	return ret;
+    return ret;
 }
 
-Lso.prototype.get = function(key)
-{
-	zinAssert((key in this.m_properties) && this.m_properties[key] != null);
+Lso.prototype.get = function (key) {
+    zinAssert((key in this.m_properties) && this.m_properties[key] != null);
 
-	return this.m_properties[key];
+    return this.m_properties[key];
 }
 
-Lso.prototype.set = function(key, value)
-{
-	zinAssert(key in this.m_properties);
+Lso.prototype.set = function (key, value) {
+    zinAssert(key in this.m_properties);
 
-	this.m_properties[key] = value;
+    this.m_properties[key] = value;
 }
 
-Lso.prototype.toString = function()
-{
-	var ret = "";
-	var isFirst = true;
+Lso.prototype.toString = function () {
+    var ret = "";
+    var isFirst = true;
 
-	for (var i = 0; i < Lso.aPartsAll.length; i++)
-		if (isFirst)
-		{
-			ret += this.m_properties[Lso.aPartsAll[i]];
-			isFirst = false;
-		}
-		else
-			ret += "#" + this.m_properties[Lso.aPartsAll[i]];
+    for (var i = 0; i < Lso.aPartsAll.length; i++)
+        if (isFirst) {
+            ret += this.m_properties[Lso.aPartsAll[i]];
+            isFirst = false;
+        }
+        else {
+            ret += "#" + this.m_properties[Lso.aPartsAll[i]];
+        }
 
-	return ret;
+    return ret;
 }
 
-Lso.normalise = function(zfi, attr)
-{
-	return zfi.isPresent(attr) ? zfi.get(attr) : "";
+Lso.normalise = function (zfi, attr) {
+    return zfi.isPresent(attr) ? zfi.get(attr) : "";
 }
 

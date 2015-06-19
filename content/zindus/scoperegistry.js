@@ -24,31 +24,34 @@
 // See: http://weblogs.mozillazine.org/weirdal/archives/008101.html
 
 const ZindusScopeRegistry = {
-	m_default_scope : 'fred',
-	m_subscript_loader: Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService(Components.interfaces.mozIJSSubScriptLoader),
-	m_a_registered_scopes: {},
-	getScope: function (scope_id) {
-		if (!scope_id)
-			scope_id = this.m_default_scope;
+    m_default_scope:       'fred',
+    m_subscript_loader:    Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService(Components.interfaces.mozIJSSubScriptLoader),
+    m_a_registered_scopes: {},
+    getScope:              function (scope_id) {
+        if (!scope_id) {
+            scope_id = this.m_default_scope;
+        }
 
-		if (typeof this.m_a_registered_scopes[scope_id] == "undefined")
-			this.m_a_registered_scopes[scope_id] = {};
+        if (typeof this.m_a_registered_scopes[scope_id] == "undefined") {
+            this.m_a_registered_scopes[scope_id] = {};
+        }
 
-		return this.m_a_registered_scopes[scope_id];
-	},
-	includejs: function (url, scope_id) {
-		url = 'chrome://zindus/content/' + url;
-		this.include(url, scope_id);
-	},
-	include: function (url, scope_id) {
-		if (!scope_id)
-			scope_id = this.m_default_scope;
+        return this.m_a_registered_scopes[scope_id];
+    },
+    includejs:             function (url, scope_id) {
+        url = 'chrome://zindus/content/' + url;
+        this.include(url, scope_id);
+    },
+    include:               function (url, scope_id) {
+        if (!scope_id) {
+            scope_id = this.m_default_scope;
+        }
 
-		if (scope_id != "none") {
-			var scope_obj = this.getScope(scope_id);
-			this.m_subscript_loader.loadSubScript(url, scope_obj);
-		} else {
-			this.m_subscript_loader.loadSubScript(url);
-		}
-	}
+        if (scope_id != "none") {
+            var scope_obj = this.getScope(scope_id);
+            this.m_subscript_loader.loadSubScript(url, scope_obj);
+        } else {
+            this.m_subscript_loader.loadSubScript(url);
+        }
+    }
 };

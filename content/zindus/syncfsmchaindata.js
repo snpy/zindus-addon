@@ -24,120 +24,136 @@
 // An instance of this class is passed from SyncFsm to SyncFsm - carrying state from one to the next
 //
 
-function SyncFsmChainData(a_accounts)
-{
-	var account;
+function SyncFsmChainData(a_accounts) {
+    var account;
 
-	zinAssert(a_accounts);
+    zinAssert(a_accounts);
 
-	this.m_account_index     = 0;
-	this.m_a_item            = new Array(a_accounts.length);
-	this.m_a_first_of_format = new Object();
-	this.m_a_last_of_format  = new Object();
-	this.m_a_sourceid        = new Object();
+    this.m_account_index = 0;
+    this.m_a_item = new Array(a_accounts.length);
+    this.m_a_first_of_format = new Object();
+    this.m_a_last_of_format = new Object();
+    this.m_a_sourceid = new Object();
 
-	for (var i = 0; i < this.m_a_item.length; i++) {
-		account = a_accounts[i];
+    for (var i = 0; i < this.m_a_item.length; i++) {
+        account = a_accounts[i];
 
-		this.m_a_item[i] = newObject("account", account);
+        this.m_a_item[i] = newObject("account", account);
 
-		for (var j in SyncFsmChainData.ITEM_KEYS)
-			this.m_a_item[i][j] = SyncFsmChainData.ITEM_KEYS[j]();
+        for (var j in SyncFsmChainData.ITEM_KEYS)
+            this.m_a_item[i][j] = SyncFsmChainData.ITEM_KEYS[j]();
 
-		if (!(account.format_xx() in this.m_a_first_of_format))
-			this.m_a_first_of_format[account.format_xx()] = i;
+        if (!(account.format_xx() in this.m_a_first_of_format)) {
+            this.m_a_first_of_format[account.format_xx()] = i;
+        }
 
-		this.m_a_last_of_format[account.format_xx()] = i;
+        this.m_a_last_of_format[account.format_xx()] = i;
 
-		this.m_a_sourceid[AccountStatic.indexToSourceId(i)] = true;
-	}
+        this.m_a_sourceid[AccountStatic.indexToSourceId(i)] = true;
+    }
 }
 
 SyncFsmChainData.ITEM_KEYS = {
-	c_start:             function() { return 0;            },
-	is_gd_group_mod:     function() { return false;        },
-	is_gd_token_invalid: function() { return false;        },
-	is_tb_changed:       function() { return false;        },
-	is_slow_sync:        function() { return false;        },
-	a_failcodes_seen:    function() { return new Object(); }
+    c_start:             function () {
+        return 0;
+    },
+    is_gd_group_mod:     function () {
+        return false;
+    },
+    is_gd_token_invalid: function () {
+        return false;
+    },
+    is_tb_changed:       function () {
+        return false;
+    },
+    is_slow_sync:        function () {
+        return false;
+    },
+    a_failcodes_seen:    function () {
+        return new Object();
+    }
 };
 
 SyncFsmChainData.prototype = {
-	toString : function() {
-		var ret = "SyncFsmChainData:" +
-		          " account_index: "     + this.m_account_index +
-			      " a_first_of_format: " + aToString(this.m_a_first_of_format) +
-			      " a_last_of_format: "  + aToString(this.m_a_last_of_format);
+    toString:                 function () {
+        var ret = "SyncFsmChainData:" +
+            " account_index: " + this.m_account_index +
+            " a_first_of_format: " + aToString(this.m_a_first_of_format) +
+            " a_last_of_format: " + aToString(this.m_a_last_of_format);
 
-		for (var i = 0; i < this.m_a_item.length; i++) {
-			ret += "\n account: " + i + " : " + this.account(i).toString();
+        for (var i = 0; i < this.m_a_item.length; i++) {
+            ret += "\n account: " + i + " : " + this.account(i).toString();
 
-			for (var j in SyncFsmChainData.ITEM_KEYS)
-				if (typeof(this.sourceid(AccountStatic.indexToSourceId(i), j)) == 'object')
-					ret += " " + j + ": " + aToString(this.sourceid(AccountStatic.indexToSourceId(i), j));
-				else
-					ret += " " + j + ": " + this.sourceid(AccountStatic.indexToSourceId(i), j);
-		}
+            for (var j in SyncFsmChainData.ITEM_KEYS)
+                if (typeof(this.sourceid(AccountStatic.indexToSourceId(i), j)) == 'object') {
+                    ret += " " + j + ": " + aToString(this.sourceid(AccountStatic.indexToSourceId(i), j));
+                } else {
+                    ret += " " + j + ": " + this.sourceid(AccountStatic.indexToSourceId(i), j);
+                }
+        }
 
-		return ret;
-	},
-	is_first_in_chain : function() {
-		return this.m_account_index == 0;
-	},
-	is_last_in_chain : function() {
-		return this.m_account_index == this.m_a_item.length - 1;
-	},
-	account : function(index) {
-		if (arguments.length == 1)
-			zinAssertAndLog(index < this.m_a_item.length, index);
-		else
-			index = this.m_account_index;
+        return ret;
+    },
+    is_first_in_chain:        function () {
+        return this.m_account_index == 0;
+    },
+    is_last_in_chain:         function () {
+        return this.m_account_index == this.m_a_item.length - 1;
+    },
+    account:                  function (index) {
+        if (arguments.length == 1) {
+            zinAssertAndLog(index < this.m_a_item.length, index);
+        } else {
+            index = this.m_account_index;
+        }
 
-		return this.m_a_item[index].account;
-	},
-	length : function() {
-		return this.m_a_item.length;
-	},
-	first_sourceid_of_format : function(format_xx) {
-		zinAssert(format_xx);
+        return this.m_a_item[index].account;
+    },
+    length:                   function () {
+        return this.m_a_item.length;
+    },
+    first_sourceid_of_format: function (format_xx) {
+        zinAssert(format_xx);
 
-		var index = this.m_a_first_of_format[format_xx];
+        var index = this.m_a_first_of_format[format_xx];
 
-		return typeof(index) == 'undefined' ? index : AccountStatic.indexToSourceId(index);
-	},
-	last_sourceid_of_format : function(format_xx) {
-		zinAssert(format_xx);
+        return typeof(index) == 'undefined' ? index : AccountStatic.indexToSourceId(index);
+    },
+    last_sourceid_of_format:  function (format_xx) {
+        zinAssert(format_xx);
 
-		var index = this.m_a_last_of_format[format_xx];
+        var index = this.m_a_last_of_format[format_xx];
 
-		return typeof(index) == 'undefined' ? index : AccountStatic.indexToSourceId(index);
-	},
-	signature : function() {
-		var ret = "";
-		var is_first  = true;
+        return typeof(index) == 'undefined' ? index : AccountStatic.indexToSourceId(index);
+    },
+    signature:                function () {
+        var ret = "";
+        var is_first = true;
 
-		for (var i = 0; i < this.m_a_item.length; i++) {
-			if (is_first)
-				is_first = false;
-			else
-				ret += ","
+        for (var i = 0; i < this.m_a_item.length; i++) {
+            if (is_first) {
+                is_first = false;
+            } else {
+                ret += ","
+            }
 
-			ret += AccountStatic.indexToSourceId(i) + ":" + this.account(i).unique_key();
-		}
+            ret += AccountStatic.indexToSourceId(i) + ":" + this.account(i).unique_key();
+        }
 
-		return ret;
-	},
-	sourceid : function(sourceid, key, value) {
-		var index = AccountStatic.sourceIdToIndex(sourceid);
+        return ret;
+    },
+    sourceid:                 function (sourceid, key, value) {
+        var index = AccountStatic.sourceIdToIndex(sourceid);
 
-		zinAssertAndLog(index >= 0 && index < this.m_a_item.length, "sourceid: " + sourceid);
-		zinAssertAndLog(key in SyncFsmChainData.ITEM_KEYS, "not a valid key: " + key);
+        zinAssertAndLog(index >= 0 && index < this.m_a_item.length, "sourceid: " + sourceid);
+        zinAssertAndLog(key in SyncFsmChainData.ITEM_KEYS, "not a valid key: " + key);
 
-		var item = this.m_a_item[index];
+        var item = this.m_a_item[index];
 
-		if (typeof(value) != 'undefined')
-			item[key] = value;
+        if (typeof(value) != 'undefined') {
+            item[key] = value;
+        }
 
-		return item[key];
-	}
+        return item[key];
+    }
 };

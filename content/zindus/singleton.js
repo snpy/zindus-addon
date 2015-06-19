@@ -25,28 +25,28 @@
 // and for which we want to delay construction until after all .js files are loaded.
 //
 function singleton() {
-	if (typeof (singleton.m_instance) == "undefined")
-		singleton.m_instance = new SingletonInstance();
+    if (typeof (singleton.m_instance) == "undefined") {
+        singleton.m_instance = new SingletonInstance();
+    }
 
-	return singleton.m_instance;
+    return singleton.m_instance;
 }
 
-function SingletonInstance()
-{
-	this.m_preferences      = new MozillaPreferences();
-	this.m_logger_global    = new Logger(this.get_loglevel_from_preference(), "global");
-	this.m_logger_no_prefix = new Logger(this.get_loglevel_from_preference(), "");
+function SingletonInstance() {
+    this.m_preferences = new MozillaPreferences();
+    this.m_logger_global = new Logger(this.get_loglevel_from_preference(), "global");
+    this.m_logger_no_prefix = new Logger(this.get_loglevel_from_preference(), "");
 }
 
 SingletonInstance.prototype = {
-	preferences : function() {
-		return this.m_preferences;
-	},
-	logger : function(type) {
-		return (type && type == 'info') ? this.m_logger_no_prefix : this.m_logger_global;
-	},
-	get_loglevel_from_preference : function() {
-		return (this.m_preferences.getCharPrefOrNull(this.m_preferences.branch(),
-	                        PrefSet.GENERAL + "." + PrefSet.GENERAL_AS_VERBOSE_LOGGING ) == "true") ? Logger.DEBUG : Logger.INFO;
-	}
+    preferences:                  function () {
+        return this.m_preferences;
+    },
+    logger:                       function (type) {
+        return (type && type == 'info') ? this.m_logger_no_prefix : this.m_logger_global;
+    },
+    get_loglevel_from_preference: function () {
+        return (this.m_preferences.getCharPrefOrNull(this.m_preferences.branch(),
+            PrefSet.GENERAL + "." + PrefSet.GENERAL_AS_VERBOSE_LOGGING) == "true") ? Logger.DEBUG : Logger.INFO;
+    }
 };

@@ -22,42 +22,42 @@
  * ***** END LICENSE BLOCK *****/
 
 var UnInstall = {
-	uninstallObserver : {
-		observe: function(aSubject, aTopic, aData) {
-			const uuid = "{ad7d8a66-253b-11dc-977c-000c29a3126e}";
+    uninstallObserver: {
+        observe: function (aSubject, aTopic, aData) {
+            const uuid = "{ad7d8a66-253b-11dc-977c-000c29a3126e}";
 
-			try {
-				let item = aSubject.QueryInterface(Ci.nsIUpdateItem);
+            try {
+                let item = aSubject.QueryInterface(Ci.nsIUpdateItem);
 
-				if (item.id == uuid && aData == "item-uninstalled") {
-					// gBrowser.selectedTab = gBrowser.addTab(url-goes-here);
+                if (item.id == uuid && aData == "item-uninstalled") {
+                    // gBrowser.selectedTab = gBrowser.addTab(url-goes-here);
 
-					let accounts = AccountStatic.arrayLoadFromPrefset();
-					let pm = PasswordManager.new();
-					let i;
+                    let accounts = AccountStatic.arrayLoadFromPrefset();
+                    let pm = PasswordManager.new();
+                    let i;
 
-					for (i = 0; i < accounts.length; i++) {
-						accounts[i].passwordlocator.delPassword();
+                    for (i = 0; i < accounts.length; i++) {
+                        accounts[i].passwordlocator.delPassword();
 
-						logger().debug("uninstall: removed password for url: " + accounts[i].url + " username: " + accounts[i].username);
+                        logger().debug("uninstall: removed password for url: " + accounts[i].url + " username: " + accounts[i].username);
 
-						if (accounts[i].format_xx() == FORMAT_GD) {
-							let pl = new PasswordLocator(accounts[i].passwordlocator);
-							pl.url(eGoogleLoginUrl.kAuthToken);
-							pl.delPassword();
-							logger().debug("uninstall: removed authtoken for username: " + accounts[i].username);
-						}
-					}
+                        if (accounts[i].format_xx() == FORMAT_GD) {
+                            let pl = new PasswordLocator(accounts[i].passwordlocator);
+                            pl.url(eGoogleLoginUrl.kAuthToken);
+                            pl.delPassword();
+                            logger().debug("uninstall: removed authtoken for username: " + accounts[i].username);
+                        }
+                    }
 
-					logger().debug("uninstall: about to delete preferences");
+                    logger().debug("uninstall: about to delete preferences");
 
-					preferences().deleteBranch(preferences().branch());
-				}
-			} catch (e) {
-			}
-		}
-	},
-	addObserver : function() {
-		ObserverService.service().addObserver(this.uninstallObserver, "em-action-requested", false);
-	}
+                    preferences().deleteBranch(preferences().branch());
+                }
+            } catch (e) {
+            }
+        }
+    },
+    addObserver:       function () {
+        ObserverService.service().addObserver(this.uninstallObserver, "em-action-requested", false);
+    }
 };
