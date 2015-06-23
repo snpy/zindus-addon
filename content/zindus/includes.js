@@ -21,30 +21,31 @@
  *
  * ***** END LICENSE BLOCK *****/
 
-with (ZindusScopeRegistry.getScope()) {
-    ZindusScopeRegistry.includejs("const.js");
-    ZindusScopeRegistry.includejs("util.js");
-    ZindusScopeRegistry.includejs("bimap.js");
-    ZindusScopeRegistry.includejs("enum.js");
-    ZindusScopeRegistry.includejs("mozillapreferences.js");
-    ZindusScopeRegistry.includejs("filesystem.js");
-    ZindusScopeRegistry.includejs("passwordmanager.js");
-    ZindusScopeRegistry.includejs("prefset.js");
-    ZindusScopeRegistry.includejs("logger.js");
-    ZindusScopeRegistry.includejs("singleton.js");
-    ZindusScopeRegistry.includejs("windowcollection.js");
-    ZindusScopeRegistry.includejs("statusbar.js");
-    ZindusScopeRegistry.includejs("bigstring.js");
-    ZindusScopeRegistry.includejs("account.js");
-    ZindusScopeRegistry.includejs("maestro.js");
-    ZindusScopeRegistry.includejs("syncfsm.js");
-    ZindusScopeRegistry.includejs("syncfsmexitstatus.js");
-    ZindusScopeRegistry.includejs("syncfsmchaindata.js");
-    ZindusScopeRegistry.includejs("syncfsmobserver.js");
-    ZindusScopeRegistry.includejs("observerservice.js");
-    ZindusScopeRegistry.includejs("timer.js");
-    ZindusScopeRegistry.includejs("configsettings.js");
-    ZindusScopeRegistry.includejs("googlerule.js");
-    ZindusScopeRegistry.includejs("userprompt.js");
-    ZindusScopeRegistry.includejs("appinfo.js");
+with (ZindusScopeRegistry.getScope())
+{
+	ZindusScopeRegistry.includejs("const.js");
+	ZindusScopeRegistry.includejs("util.js");
+	ZindusScopeRegistry.includejs("bimap.js");
+	ZindusScopeRegistry.includejs("enum.js");
+	ZindusScopeRegistry.includejs("mozillapreferences.js");
+	ZindusScopeRegistry.includejs("filesystem.js");
+	ZindusScopeRegistry.includejs("passwordmanager.js");
+	ZindusScopeRegistry.includejs("prefset.js");
+	ZindusScopeRegistry.includejs("logger.js");
+	ZindusScopeRegistry.includejs("singleton.js");
+	ZindusScopeRegistry.includejs("windowcollection.js");
+	ZindusScopeRegistry.includejs("statusbar.js");
+	ZindusScopeRegistry.includejs("bigstring.js");
+	ZindusScopeRegistry.includejs("account.js");
+	ZindusScopeRegistry.includejs("maestro.js");
+	ZindusScopeRegistry.includejs("syncfsm.js");
+	ZindusScopeRegistry.includejs("syncfsmexitstatus.js");
+	ZindusScopeRegistry.includejs("syncfsmchaindata.js");
+	ZindusScopeRegistry.includejs("syncfsmobserver.js");
+	ZindusScopeRegistry.includejs("observerservice.js");
+	ZindusScopeRegistry.includejs("timer.js");
+	ZindusScopeRegistry.includejs("configsettings.js");
+	ZindusScopeRegistry.includejs("googlerule.js");
+	ZindusScopeRegistry.includejs("userprompt.js");
+	ZindusScopeRegistry.includejs("appinfo.js");
 }

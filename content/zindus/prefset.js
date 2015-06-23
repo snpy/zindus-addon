@@ -21,34 +21,35 @@
  *
  * ***** END LICENSE BLOCK *****/
 
-function PrefSet(prefprefix, a) {
-    this.m_id = PrefSet.ID_UNINITIALISED;
-    this.m_prefprefix = prefprefix;
-    this.m_properties = new Object();
+function PrefSet(prefprefix, a)
+{
+	this.m_id         = PrefSet.ID_UNINITIALISED;
+	this.m_prefprefix = prefprefix;
+	this.m_properties = new Object();
 
-    for (var i in a)
-        this.m_properties[a[i]] = PrefSet.DEFAULT_VALUE;
+	for (var i in a)
+		this.m_properties[a[i]] = PrefSet.DEFAULT_VALUE;
 }
 
-PrefSet.DEFAULT_VALUE = null;
-PrefSet.ID_UNINITIALISED = -1;
+PrefSet.DEFAULT_VALUE         = null;
+PrefSet.ID_UNINITIALISED      = -1;
 
-PrefSet.ACCOUNT = "account"; // see AccountStatic.m_prefset_properties for the properties
+PrefSet.ACCOUNT               = "account"; // see AccountStatic.m_prefset_properties for the properties
 
-PrefSet.PREAUTH = "preauth";
-PrefSet.PREAUTH_NAME = "name";
-PrefSet.PREAUTH_REGEXP = "regexp";
+PrefSet.PREAUTH               = "preauth";
+PrefSet.PREAUTH_NAME          = "name";
+PrefSet.PREAUTH_REGEXP        = "regexp";
 PrefSet.PREAUTH_URI_HIER_PART = "preauth_url_hier_part";
-PrefSet.PREAUTH_POST_BODY = "preauth_post_body";
-PrefSet.PREAUTH_PROPERTIES = [PrefSet.PREAUTH_NAME, PrefSet.PREAUTH_REGEXP, PrefSet.PREAUTH_URI_HIER_PART, PrefSet.PREAUTH_POST_BODY];
+PrefSet.PREAUTH_POST_BODY     = "preauth_post_body";
+PrefSet.PREAUTH_PROPERTIES    = [ PrefSet.PREAUTH_NAME, PrefSet.PREAUTH_REGEXP, PrefSet.PREAUTH_URI_HIER_PART, PrefSet.PREAUTH_POST_BODY ];
 
-PrefSet.GENERAL = "general";
-PrefSet.GENERAL_AS_AUTO_SYNC = "as_auto_sync";
-PrefSet.GENERAL_AS_VERBOSE_LOGGING = "as_verbose_logging";
+PrefSet.GENERAL                        = "general";
+PrefSet.GENERAL_AS_AUTO_SYNC           = "as_auto_sync";
+PrefSet.GENERAL_AS_VERBOSE_LOGGING     = "as_verbose_logging";
 PrefSet.GENERAL_GD_SYNC_POSTAL_ADDRESS = "gd_sync_postal_address";
-PrefSet.GENERAL_GD_RULE_DONT_ASK = "gd_rule_dont_ask";
-PrefSet.GENERAL_AS_PROPERTIES = [PrefSet.GENERAL_AS_AUTO_SYNC, PrefSet.GENERAL_AS_VERBOSE_LOGGING];
-PrefSet.GENERAL_GD_PROPERTIES = [PrefSet.GENERAL_GD_SYNC_POSTAL_ADDRESS, PrefSet.GENERAL_GD_RULE_DONT_ASK];
+PrefSet.GENERAL_GD_RULE_DONT_ASK       = "gd_rule_dont_ask";
+PrefSet.GENERAL_AS_PROPERTIES          = [ PrefSet.GENERAL_AS_AUTO_SYNC,           PrefSet.GENERAL_AS_VERBOSE_LOGGING ];
+PrefSet.GENERAL_GD_PROPERTIES          = [ PrefSet.GENERAL_GD_SYNC_POSTAL_ADDRESS, PrefSet.GENERAL_GD_RULE_DONT_ASK   ];
 
 // Both id and branch are optional
 // id is optional because there might only be a single subsection under prefprefix
@@ -56,99 +57,109 @@ PrefSet.GENERAL_GD_PROPERTIES = [PrefSet.GENERAL_GD_SYNC_POSTAL_ADDRESS, PrefSet
 // a) the collection need only create one branch object and pass it to each .load() method
 // b) at some point we might like to distinguish between user-defined and default preferences,
 //
-PrefSet.prototype.load = function (id, branch) {
-    zinAssert((arguments.length == 0) || (arguments.length == 1) || (arguments.length == 2));
+PrefSet.prototype.load = function(id, branch)
+{
+	zinAssert((arguments.length == 0) || (arguments.length == 1) || (arguments.length == 2));
 
-    this.m_id = id ? id : PrefSet.ID_UNINITIALISED;
-    branch = branch ? branch : preferences().branch();
+	this.m_id = id ?     id     : PrefSet.ID_UNINITIALISED;
+	branch    = branch ? branch : preferences().branch();
 
-    for (var i in this.m_properties) {
-        try {
-            this.m_properties[i] = branch.getCharPref(this.makePrefKey(this.m_id, i));
-        }
-        catch (ex) {
-            // logger().debug("PrefSet.prototype.load: exception when getting key: " + this.makePrefKey(this.m_id, i));
-        }
-    }
+	for (var i in this.m_properties)
+	{
+		try {
+			this.m_properties[i] = branch.getCharPref(this.makePrefKey(this.m_id, i));
+		}
+		catch (ex) {
+			// logger().debug("PrefSet.prototype.load: exception when getting key: " + this.makePrefKey(this.m_id, i));
+		}
+	}
 
-    return true;
+	return true;
 }
 
-PrefSet.prototype.save = function () {
-    var branch = preferences().branch();
-    var retval = false;
-    var i;
+PrefSet.prototype.save = function()
+{
+	var branch = preferences().branch();
+	var retval = false;
+	var i;
 
-    zinAssert(this.m_id != null && (this.m_id == PrefSet.ID_UNINITIALISED || this.m_id >= 0));
+	zinAssert(this.m_id != null && (this.m_id == PrefSet.ID_UNINITIALISED || this.m_id >= 0));
 
-    try {
-        for (i in this.m_properties) {
-            branch.setCharPref(this.makePrefKey(this.m_id, i), this.m_properties[i]);
-            logger().debug("saving preference key: " + i + " value: " + this.m_properties[i]);
-        }
+	try {
+		for (i in this.m_properties)
+		{
+			branch.setCharPref(this.makePrefKey(this.m_id, i), this.m_properties[i]);
+			logger().debug("saving preference key: " + i + " value: " + this.m_properties[i]);
+		}
 
-        retval = true;
-    }
-    catch (ex) {
-        logger().warn("PrefSet.prototype.save: exception thrown i: " + i + " this: " + this.toString() + " " + executionStackAsString());
-    }
+		retval = true;
+	}
+	catch (ex) {
+		logger().warn("PrefSet.prototype.save: exception thrown i: " + i + " this: " + this.toString() + " " + executionStackAsString());
+	}
 
-    return retval;
+	return retval;
 }
 
-PrefSet.prototype.remove = function () {
-    var branch = preferences().branch();
-    var ret = false;
+PrefSet.prototype.remove = function()
+{
+	var branch = preferences().branch();
+	var ret = false;
 
-    zinAssert(this.m_id != null && (this.m_id == PrefSet.ID_UNINITIALISED || this.m_id >= 0));
+	zinAssert(this.m_id != null && (this.m_id == PrefSet.ID_UNINITIALISED || this.m_id >= 0));
 
-    try {
-        branch.deleteBranch(this.makePrefKey(this.m_id));
+	try {
+		branch.deleteBranch(this.makePrefKey(this.m_id));
 
-        ret = true;
-    }
-    catch (ex) {
-    }
+		ret = true;
+	}
+	catch (ex) {
+	}
 
-    return ret;
+	return ret;
 }
 
-PrefSet.prototype.hasUserValue = function (property) {
-    var branch = preferences().branch();
-    var ret = false;
+PrefSet.prototype.hasUserValue = function(property)
+{
+	var branch = preferences().branch();
+	var ret = false;
 
-    try {
-        ret = branch.prefHasUserValue(this.makePrefKey(this.m_id, property));
-    }
-    catch (ex) {
-    }
+	try {
+		ret = branch.prefHasUserValue(this.makePrefKey(this.m_id, property));
+	}
+	catch (ex) {
+	}
 
-    return ret;
+	return ret;
 }
 
-PrefSet.prototype.toString = function () {
-    var ret = " m_id: " + this.m_id + " m_properties: {";
+PrefSet.prototype.toString = function()
+{
+	var ret = " m_id: " + this.m_id + " m_properties: {";
 
-    for (i in this.m_properties)
-        ret += " " + i + ": \'" + (this.m_properties[i] == PrefSet.DEFAULT_VALUE ? "<not-set>" : this.m_properties[i]) + "\'";
+	for (i in this.m_properties)
+		ret += " " + i + ": \'" + (this.m_properties[i] == PrefSet.DEFAULT_VALUE ? "<not-set>" : this.m_properties[i]) + "\'";
 
-    ret += " }";
+	ret += " }";
 
-    return ret;
+	return ret;
 }
 
-PrefSet.prototype.getProperty = function (property) {
-    zinAssert(arguments.length == 1);
-    return this.m_properties[property];
+PrefSet.prototype.getProperty = function(property)
+{
+	zinAssert(arguments.length == 1);
+	return this.m_properties[property];
 }
 
-PrefSet.prototype.setProperty = function (property, value) {
-    this.m_properties[property] = value;
+PrefSet.prototype.setProperty = function(property, value)
+{
+	this.m_properties[property] = value;
 }
 
-PrefSet.prototype.delProperty = function (property) {
-    zinAssert(arguments.length == 1);
-    delete this.m_properties[property];
+PrefSet.prototype.delProperty = function(property)
+{
+	zinAssert(arguments.length == 1);
+	delete this.m_properties[property];
 }
 
 // Makes keys of the following form:
@@ -159,18 +170,17 @@ PrefSet.prototype.delProperty = function (property) {
 //    1       not supplied  fred.1
 //    1       joe           fred.1.joe
 //
-PrefSet.prototype.makePrefKey = function (id, property) {
-    var ret = "";
+PrefSet.prototype.makePrefKey = function(id, property)
+{
+	var ret = "";
 
-    ret += this.m_prefprefix;
+	ret += this.m_prefprefix;
 
-    if (id != PrefSet.ID_UNINITIALISED) {
-        ret += "." + id;
-    }
+	if (id != PrefSet.ID_UNINITIALISED)
+		ret += "." + id;
 
-    if (arguments.length == 2) {
-        ret += "." + property;
-    }
+	if (arguments.length == 2)
+		ret +=  "." + property;
 
-    return ret;
+	return ret;
 }

@@ -21,44 +21,43 @@
  *
  * ***** END LICENSE BLOCK *****/
 
-function ConfigGd() {
-    this.m_prefset_gd = new PrefSet(PrefSet.GENERAL, PrefSet.GENERAL_GD_PROPERTIES);
+function ConfigGd()
+{
+	this.m_prefset_gd = new PrefSet(PrefSet.GENERAL, PrefSet.GENERAL_GD_PROPERTIES);
 
-    this.m_bimap = new Object();
-    this.m_bimap['postal'] = new BiMap(["true", "false"],
-        ["cgd-postal-true", "cgd-postal-false"]);
-    this.m_bimap['conflict'] = new BiMap(["ask-me", "dont-ask"],
-        ["cgd-conflict-ask-me", "cgd-conflict-dont-ask"]);
+	this.m_bimap = new Object();
+	this.m_bimap['postal']    = new BiMap( [ "true",                "false"                 ],
+	                                       [ "cgd-postal-true",     "cgd-postal-false"      ] );
+	this.m_bimap['conflict']  = new BiMap( [ "ask-me",              "dont-ask"              ],
+	                                       [ "cgd-conflict-ask-me", "cgd-conflict-dont-ask" ] );
 
-    this.m_map = {
-        0: {group:       "cgd-postal",
-            bimap:       'postal',
-            prefset_key: PrefSet.GENERAL_GD_SYNC_POSTAL_ADDRESS,
-            default:     "cgd-postal-false"
-        },
-        1: {group: "cgd-conflict", bimap: 'conflict', prefset_key: PrefSet.GENERAL_GD_RULE_DONT_ASK, default: "ask-me"}
-    };
+	this.m_map = {
+		0: { group: "cgd-postal",   bimap: 'postal',    prefset_key: PrefSet.GENERAL_GD_SYNC_POSTAL_ADDRESS, default: "cgd-postal-false" },
+		1: { group: "cgd-conflict", bimap: 'conflict',  prefset_key: PrefSet.GENERAL_GD_RULE_DONT_ASK,       default: "ask-me"         } };
 }
 
-ConfigGd.prototype.onLoad = function (target) {
-    this.m_prefset_gd.load();
+ConfigGd.prototype.onLoad = function(target)
+{
+	this.m_prefset_gd.load();
 
-    this.initialiseView();
+	this.initialiseView();
 }
 
-ConfigGd.prototype.onAccept = function () {
-    var a = this.m_map;
-    for (var k in a)
-        ConfigSettingsStatic.setPrefsetFromRadio(a[k].group, this.m_bimap[a[k].bimap], this.m_prefset_gd, a[k].prefset_key);
+ConfigGd.prototype.onAccept = function()
+{
+	var a = this.m_map;
+	for (var k in a)
+		ConfigSettingsStatic.setPrefsetFromRadio(a[k].group, this.m_bimap[a[k].bimap], this.m_prefset_gd, a[k].prefset_key);
 
-    this.m_prefset_gd.save();
+	this.m_prefset_gd.save();
 }
 
-ConfigGd.prototype.initialiseView = function () {
-    xulSetHtml('cgd-help-postal', help_url('google-postal-xml'));
-    xulSetHtml('cgd-help-rules', help_url('google-stay-in-sync'));
+ConfigGd.prototype.initialiseView = function()
+{
+	xulSetHtml('cgd-help-postal', help_url('google-postal-xml'));
+	xulSetHtml('cgd-help-rules',  help_url('google-stay-in-sync'));
 
-    var a = this.m_map;
-    for (var k in a)
-        ConfigSettingsStatic.setRadioFromPrefset(a[k].group, this.m_bimap[a[k].bimap], this.m_prefset_gd, a[k].prefset_key, a[k].default);
+	var a = this.m_map;
+	for (var k in a)
+		ConfigSettingsStatic.setRadioFromPrefset(a[k].group, this.m_bimap[a[k].bimap], this.m_prefset_gd, a[k].prefset_key, a[k].default);
 }

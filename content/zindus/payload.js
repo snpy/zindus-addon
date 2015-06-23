@@ -23,14 +23,15 @@
 
 // This class helps to pass data to/from parent + child windows as a parameter to window.openDialog()
 //
-function Payload() {
-    this.m_args = null;
-    this.m_result = null;
+function Payload()
+{
+	this.m_args   = null;
+	this.m_result = null;
 }
 
 Payload.prototype = {
-    toString: function () {
-        return " m_args: " + ((this.m_args != null) ? this.m_args.toString() : "null") +
-            " m_result: " + ((this.m_result != null) ? this.m_result.toString() : "null");
-    }
+	toString : function() {
+		return " m_args: "   + ((this.m_args   != null) ? this.m_args.toString()   : "null") +
+		       " m_result: " + ((this.m_result != null) ? this.m_result.toString() : "null");
+}
 };

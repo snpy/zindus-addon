@@ -26,70 +26,65 @@
 // var enm = new ZinEnum({ kA: 0x01, kB : 0x02, kC : 0x04 });
 
 function ZinEnum() {
-    var i, key, value;
+	var i, key, value;
 
-    zinAssert(arguments.length > 0 && (typeof(arguments[0] == 'object' || (arguments.length % 2 == 0))));
+	zinAssert(arguments.length > 0 && (typeof(arguments[0] == 'object' || (arguments.length % 2 == 0))));
 
-    this.m_properties = new Object();
-    this.m_reverse = new Object();
+	this.m_properties = new Object();
+	this.m_reverse    = new Object();
 
-    if (typeof(arguments[0]) == 'object') {
-        for (key in arguments[0])
-            this.m_properties[key] = arguments[0][key];
-    } else {
-        for (i = 0; i < arguments.length; i++)
-            this.m_properties[arguments[i]] = i + 1;
-    }
+	if (typeof(arguments[0]) == 'object')
+		for (key in arguments[0])
+			this.m_properties[key] = arguments[0][key];
+	else
+		for (i = 0; i < arguments.length; i++)
+			this.m_properties[arguments[i]] = i+1;
 
-    for (key in this.m_properties) {
-        this.__defineGetter__(key, this.getter(key));
+	for (key in this.m_properties) {
+		this.__defineGetter__(key, this.getter(key));
 
-        value = this.m_properties[key];
+		value = this.m_properties[key];
 
-        zinAssertAndLog(!(value in this.m_reverse), value);
+		zinAssertAndLog(!(value in this.m_reverse), value);
 
-        this.m_reverse[value] = key;
-    }
+		this.m_reverse[value] = key;
+	}
 }
 
 ZinEnum.prototype = {
-    getter:       function (key) {
-        return function () {
-            return this.m_properties[key];
-        };
-    },
-    generator:    function () {
-        for (var key in this.m_properties)
-            yield [key, this.m_properties[key]];
+	getter: function(key) {
+		return function() { return this.m_properties[key]; };
+	},
+	generator: function() {
+		for (var key in this.m_properties)
+			yield [ key, this.m_properties[key] ];
 
-        yield false;
-    },
-    isPresent:    function (value) {
-        return value in this.m_reverse;
-    },
-    keyFromValue: function (value) {
-        zinAssertAndLog(this.isPresent(value), value);
-        return this.m_reverse[value];
-    },
-    toArray:      function () {
-        var ret = new Array();
-        for (var key in this.m_properties)
-            ret.push(this.m_properties[key]);
-        return ret;
-    },
-    toString:     function () {
-        return aToString(this.m_properties);
-    },
-    __iterator__: function (is_keys_only) {
-        for (var key in this.m_properties)
-            yield is_keys_only ? this.m_properties[key] : [key, this.m_properties[key]];
-    }
+		yield false;
+	},
+	isPresent : function (value) {
+		return value in this.m_reverse;
+	},
+	keyFromValue : function (value) {
+		zinAssertAndLog(this.isPresent(value), value);
+		return this.m_reverse[value];
+	},
+	toArray : function () {
+		var ret = new Array();
+		for (var key in this.m_properties)
+			ret.push(this.m_properties[key]);
+		return ret;
+	},
+	toString : function () {
+		return aToString(this.m_properties);
+	},
+	__iterator__: function(is_keys_only) {
+		for (var key in this.m_properties)
+			yield is_keys_only ? this.m_properties[key] : [ key, this.m_properties[key] ];
+	}
 };
 
 // This really belongs in a separate source file but until we get a few more of such things we'll leave them here for the moment.
 // can't put it in const.js or util.js because they're included before this one.
 //
-const eGoogleLoginUrl = new ZinEnum({
-    'kClientLogin': "https://www.google.com/accounts/ClientLogin",
-    'kAuthToken':   "https://www.google.com/accounts/ClientLogin/Contacts/AuthToken"
-});
+const eGoogleLoginUrl = new ZinEnum( { 'kClientLogin'   : "https://www.google.com/accounts/ClientLogin",
+                                       'kAuthToken'     : "https://www.google.com/accounts/ClientLogin/Contacts/AuthToken" } );

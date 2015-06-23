@@ -21,20 +21,21 @@
  *
  * ***** END LICENSE BLOCK *****/
 
-function StopWatch(prefix) {
-    this.m_prefix = prefix;
-    this.m_start = new Date(Date.now());
-    this.m_logger = newLogger("stopwatch");
+function StopWatch(prefix)
+{
+	this.m_prefix = prefix;
+	this.m_start  = new Date(Date.now());
+	this.m_logger = newLogger("stopwatch");
 }
 
 StopWatch.prototype = {
-    mark:    function (marker) {
-        this.m_logger.debug(this.m_prefix + ": " + marker + ": " + this.elapsed());
-    },
-    elapsed: function () {
-        return (new Date(Date.now()) - this.m_start);
-    },
-    reset:   function () {
-        this.m_start = new Date(Date.now());
-    }
+	mark : function(marker) {
+		this.m_logger.debug(this.m_prefix + ": " + marker + ": " + this.elapsed());
+	},
+	elapsed : function() {
+		return (new Date(Date.now()) - this.m_start);
+	},
+	reset : function() {
+		this.m_start  = new Date(Date.now());
+	}
 };

@@ -21,148 +21,131 @@
  *
  * ***** END LICENSE BLOCK *****/
 
-function GdAddressConverter() {
-    this.m_logger = newLogger("GdAddressConverter");
+function GdAddressConverter()
+{
+	this.m_logger = newLogger("GdAddressConverter");
 
-    this.a_element_unique = ["city", "state", "postcode", "country", "otheraddr"];
-    this.a_suffix_unique = ["City", "State", "ZipCode", "Country", "otheraddr"];
-    this.a_suffix_all = ["Address", "Address2"].concat(this.a_suffix_unique);
+	this.a_element_unique = [ "city", "state", "postcode", "country", "otheraddr" ];
+	this.a_suffix_unique  = [ "City", "State", "ZipCode",  "Country", "otheraddr" ];
+	this.a_suffix_all     = [ "Address", "Address2" ].concat(this.a_suffix_unique);
 
-    this.m_suffix_element_bimap = new BiMap(this.a_suffix_unique, this.a_element_unique);
+	this.m_suffix_element_bimap = new BiMap(this.a_suffix_unique, this.a_element_unique);
 }
 
-GdAddressConverter.ADDR_TO_XML = 0x10;
+GdAddressConverter.ADDR_TO_XML        = 0x10;
 GdAddressConverter.ADDR_TO_PROPERTIES = 0x20;
-GdAddressConverter.PRETTY_XML = 0x04;
+GdAddressConverter.PRETTY_XML         = 0x04;
 
 // returns true unless ADDR_TO_PROPERTIES and the string couldn't be parsed as xml
 //
-GdAddressConverter.prototype.convert = function (a_xml, key, a_fields, dirn) {
-    zinAssert(dirn && typeof(a_xml) == 'object');
+GdAddressConverter.prototype.convert = function(a_xml, key, a_fields, dirn)
+{
+	zinAssert(dirn && typeof(a_xml) == 'object');
 
-    var address, value;
-    var msg = "";
-    var ret = true;
+	var address, value;
+	var msg = "";
+	var ret = true;
 
-    if (dirn & GdAddressConverter.ADDR_TO_PROPERTIES) {
-        var xml_as_char = a_xml[key].replace(re_xml_declaration, ""); // bug 336551
+	if (dirn & GdAddressConverter.ADDR_TO_PROPERTIES)
+	{
+		var xml_as_char = a_xml[key].replace(re_xml_declaration, ""); // bug 336551
 
-        address = this.string_to_e4x(xml_as_char);
+		address = this.string_to_e4x(xml_as_char);
 
-        ret = this.is_e4x_address(address);
+		ret = this.is_e4x_address(address);
 
-        if (ret) {
-            var ns = Namespace(Xpath.NS_ZINDUS_ADDRESS);
+		if (ret)
+		{
+			var ns = Namespace(Xpath.NS_ZINDUS_ADDRESS);
 
-            for (var i = 0; i < this.a_element_unique.length; i++)
-                this.setIfNotBlankOrEmpty(a_fields,
-                    this.m_suffix_element_bimap.lookup(null, this.a_element_unique[i]),
-                    address.ns
-        ::
-            [this.a_element_unique[i]]
-        )
-            ;
+			for (var i = 0; i < this.a_element_unique.length; i++)
+				this.setIfNotBlankOrEmpty(a_fields,
+				                          this.m_suffix_element_bimap.lookup(null, this.a_element_unique[i]),
+										  address.ns::[this.a_element_unique[i]]);
 
-            if (address.ns:
-        :
-            street.length() > 0
-        )
-            this.setIfNotBlankOrEmpty(a_fields, "Address", address.ns
-        ::
-            street[0]
-        )
-            ;
+			if (address.ns::street.length() > 0)
+				this.setIfNotBlankOrEmpty(a_fields, "Address", address.ns::street[0]);
 
-            if (address.ns:
-        :
-            street.length() > 1
-        )
-            this.setIfNotBlankOrEmpty(a_fields, "Address2", address.ns
-        ::
-            street[1]
-        )
-            ;
+			if (address.ns::street.length() > 1)
+				this.setIfNotBlankOrEmpty(a_fields, "Address2", address.ns::street[1]);
 
-            msg += " a_fields: " + aToString(a_fields);
-        }
-        else {
-            msg += " failed to parse an <address> element out of: " + xml_as_char;
-        }
-    }
-    else // dirn & ADDR_TO_XML
-    {
-        address = "<address xmlns='" + Xpath.NS_ZINDUS_ADDRESS + "'>";
-        var tag;
+			msg += " a_fields: " + aToString(a_fields);
+		}
+		else
+			msg += " failed to parse an <address> element out of: " + xml_as_char;
+	}
+	else // dirn & ADDR_TO_XML
+	{
+		address = "<address xmlns='" + Xpath.NS_ZINDUS_ADDRESS + "'>";
+		var tag;
 
-        if (!("Address" in a_fields) && ("Address2" in a_fields)) {
-            a_fields["Address"] = "";
-        }
+		if (!("Address" in a_fields) && ("Address2" in a_fields))
+			a_fields["Address"] = "";
 
-        var pretty_char = (dirn & GdAddressConverter.PRETTY_XML) ? " " : "";
+		var pretty_char = (dirn & GdAddressConverter.PRETTY_XML) ? " " : "";
 
-        for (var i = 0; i < this.a_suffix_all.length; i++)
-            if (this.a_suffix_all[i] in a_fields) {
-                tag = null
+		for (var i = 0; i < this.a_suffix_all.length; i++)
+			if (this.a_suffix_all[i] in a_fields)
+			{
+				tag = null
 
-                switch (this.a_suffix_all[i]) {
-                    case "Address":
-                    case "Address2":
-                        tag = "street";
-                        break;
-                    default:
-                        tag = this.m_suffix_element_bimap.lookup(this.a_suffix_all[i], null);
-                        break;
-                }
+				switch (this.a_suffix_all[i])
+				{
+					case "Address":
+					case "Address2": tag = "street";                                                       break;
+					default:         tag = this.m_suffix_element_bimap.lookup(this.a_suffix_all[i], null); break;
+				}
 
-                // this.m_logger.debug("blah: tag: " + tag + " this.a_suffix_all[i]: " + this.a_suffix_all[i]);
+				// this.m_logger.debug("blah: tag: " + tag + " this.a_suffix_all[i]: " + this.a_suffix_all[i]);
 
-                if (tag) {
-                    address += "\n<" + tag + ">" + pretty_char
-                    + convertCER(zinTrim(a_fields[this.a_suffix_all[i]]), CER_TO_ENTITY)
-                    + pretty_char + "</" + tag + ">";
-                }
-            }
+				if (tag)
+					address += "\n<" + tag + ">" + pretty_char
+					                       + convertCER(zinTrim(a_fields[this.a_suffix_all[i]]), CER_TO_ENTITY)
+										   + pretty_char + "</"+tag+">";
+			}
 
-        address += "\n</address>";
+		address += "\n</address>";
 
-        zinAssertAndLog(this.is_e4x_address(this.string_to_e4x(address)), "address: " + address);
+		zinAssertAndLog(this.is_e4x_address(this.string_to_e4x(address)), "address: " + address);
 
-        a_xml[key] = address;
+		a_xml[key] = address;
 
-        msg += " xml: " + a_xml[key]
-    }
+		msg += " xml: " + a_xml[key]
+	}
 
-    // this.m_logger.debug("convert: blah:" + msg + " returns: " + ret);
+	// this.m_logger.debug("convert: blah:" + msg + " returns: " + ret);
 
-    return ret;
+	return ret;
 }
 
-GdAddressConverter.prototype.setIfNotBlankOrEmpty = function (properties, key, value) {
-    value = zinTrim(String(value));
+GdAddressConverter.prototype.setIfNotBlankOrEmpty = function(properties, key, value)
+{
+	value = zinTrim(String(value));
 
-    if (value.length > 0) {
-        properties[key] = convertCER(value, CER_TO_CHAR);
-    }
+	if (value.length > 0)
+		properties[key] = convertCER(value, CER_TO_CHAR);
 }
 
-GdAddressConverter.prototype.string_to_e4x = function (str) {
-    var ret = null;
+GdAddressConverter.prototype.string_to_e4x = function(str)
+{
+	var ret = null;
 
-    try {
-        ret = new XML(str);
-    } catch (e) {
-        ; // do nothing
-    }
+	try {
+		ret = new XML(str);
+	} catch(e) {
+		; // do nothing
+	}
 
-    return ret;
+	return ret;
 }
 
-GdAddressConverter.prototype.is_e4x_address = function (e4x_xml) {
-    // this.m_logger.debug("typeof(e4x_xml): " + typeof(e4x_xml));
-    // this.m_logger.debug("e4x_xml.localName(): " + e4x_xml.localName());
-    // this.m_logger.debug("e4x_xml.namespace(): " + e4x_xml.namespace());
+GdAddressConverter.prototype.is_e4x_address = function(e4x_xml)
+{
+	// this.m_logger.debug("typeof(e4x_xml): " + typeof(e4x_xml));
+	// this.m_logger.debug("e4x_xml.localName(): " + e4x_xml.localName());
+	// this.m_logger.debug("e4x_xml.namespace(): " + e4x_xml.namespace());
 
-    let ret = typeof(e4x_xml) == 'xml' && e4x_xml.localName() == "address" && e4x_xml.namespace() == Xpath.NS_ZINDUS_ADDRESS;
+	let ret = typeof(e4x_xml) == 'xml' && e4x_xml.localName() == "address" && e4x_xml.namespace() == Xpath.NS_ZINDUS_ADDRESS;
 
-    return ret;
+	return ret;
 }

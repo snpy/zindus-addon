@@ -23,37 +23,36 @@
 
 // if you want to do 10,000 string concatenations in a row, the performance is better if they are chunked up
 // 
-function BigString() {
-    this.m_chunk_size = chunk_size('bigstring');
+function BigString()
+{
+	this.m_chunk_size = chunk_size('bigstring');
 
-    this.reset();
+	this.reset();
 }
 
 BigString.prototype = {
-    concat:             function (str) {
-        zinAssert(arguments.length == 1);
+	concat : function(str) {
+		zinAssert(arguments.length == 1);
 
-        this.m_intermediate += str;
+		this.m_intermediate += str;
 
-        if (++this.m_count > this.m_chunk_size) {
-            this.concatIntermediate(str);
-        }
-    },
-    concatIntermediate: function (str) {
-        this.m_string += this.m_intermediate;
-        this.m_intermediate = "";
-        this.m_count = 0;
-    },
-    toString:           function () {
-        if (this.m_intermediate.length > 0) {
-            this.concatIntermediate("");
-        }
+		if (++this.m_count > this.m_chunk_size)
+			this.concatIntermediate(str);
+	},
+	concatIntermediate : function(str) {
+		this.m_string += this.m_intermediate;
+		this.m_intermediate = "";
+		this.m_count = 0;
+	},
+	toString : function() {
+		if (this.m_intermediate.length > 0)
+			this.concatIntermediate("");
 
-        return this.m_string;
-    },
-    reset:              function () {
-        this.m_string = "";
-        this.m_count = 0;
-        this.m_intermediate = "";
-    }
+		return this.m_string;
+	},
+	reset : function() {
+		this.m_string = "";
+		this.m_count = 0;
+		this.m_intermediate = "";
+	}
 };

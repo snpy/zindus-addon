@@ -21,68 +21,66 @@
  *
  * ***** END LICENSE BLOCK *****/
 
-function UserPrompt() {
-    this.m_logger = newLogger("UserPrompt");
-    this.m_payload = null; // we keep it around so that we can pass the results back
+function UserPrompt()
+{
+	this.m_logger  = newLogger("UserPrompt");
+	this.m_payload = null; // we keep it around so that we can pass the results back
 }
 
 UserPrompt.prototype = {
-    onLoad:   function () {
-        this.m_payload = window.arguments[0];
+	onLoad : function() {
+		this.m_payload = window.arguments[0];
 
-        xulSetHtml("zindus-userprompt-description", this.m_payload.m_args.msg);
+		xulSetHtml("zindus-userprompt-description", this.m_payload.m_args.msg);
 
-        if (!/accept/.test(this.m_payload.m_args.args['buttons'])) {
-            dId("zindus-userprompt-dialog").getButton('accept').hidden = true;
-        } else if (!/cancel/.test(this.m_payload.m_args.args['buttons'])) {
-            dId("zindus-userprompt-dialog").getButton('cancel').hidden = true;
-        }
+		if (!/accept/.test(this.m_payload.m_args.args['buttons']))
+			dId("zindus-userprompt-dialog").getButton('accept').hidden = true;
+		else if (!/cancel/.test(this.m_payload.m_args.args['buttons']))
+			dId("zindus-userprompt-dialog").getButton('cancel').hidden = true;
 
-        dId("zindus-userprompt-show-again").hidden = !this.m_payload.m_args.args['show_again'];
-    },
-    onAccept: function () {
-        let result = newObject('button', 'accept');
+		dId("zindus-userprompt-show-again").hidden = !this.m_payload.m_args.args['show_again'];
+	},
+	onAccept : function() {
+		let result = newObject('button', 'accept');
 
-        if (this.m_payload.m_args.args['show_again']) {
-            result['show_again'] = dId("zindus-userprompt-show-again").checked;
-        }
+		if (this.m_payload.m_args.args['show_again'])
+			result['show_again'] = dId("zindus-userprompt-show-again").checked;
 
-        this.m_payload.m_result = result;
+		this.m_payload.m_result = result;
 
-        return true;
-    },
-    onCancel: function () {
-        let result = newObject('button', 'cancel');
-        this.m_payload.m_result = result;
+		return true;
+	},
+	onCancel : function() {
+		let result = newObject('button', 'cancel');
+		this.m_payload.m_result = result;
 
-        return true;
-    }
+		return true;
+	}
 };
 
-UserPrompt.show = function (msg, args) {
-    logger().debug("UserPrompt.show: msg: " + msg + " args: " + aToString(args));
+UserPrompt.show = function(msg, args)
+{
+	logger().debug("UserPrompt.show: msg: " + msg + " args: " + aToString(args));
 
-    let buttons = false;
-    let show_again = false;
-    let actual_args = {'buttons': 'accept', 'show_again': false};
-    let i;
+	let buttons     = false;
+	let show_again  = false;
+	let actual_args = { 'buttons' : 'accept', 'show_again' : false };
+	let i;
 
-    if (args) {
-        for (i in actual_args)
-            if (i in args) {
-                actual_args[i] = args[i];
-            }
-    }
+	if (args)
+		for (i in actual_args)
+			if (i in args)
+				actual_args[i] = args[i];
 
-    zinAssert(/accept/.test(actual_args['buttons']) || /cancel/.test(actual_args['show_again']));
-    zinAssert(typeof(actual_args['show_again']) == 'boolean');
+	zinAssert(/accept/.test(actual_args['buttons']) || /cancel/.test(actual_args['show_again']));
+	zinAssert(typeof(actual_args['show_again']) == 'boolean');
 
-    let payload = new Payload();
-    payload.m_args = newObject('msg', msg, 'args', actual_args);
+	let payload = new Payload();
+	payload.m_args = newObject('msg', msg, 'args', actual_args);
 
-    window.openDialog("chrome://zindus/content/userprompt.xul", "_blank", WINDOW_FEATURES, payload);
+	window.openDialog("chrome://zindus/content/userprompt.xul", "_blank", WINDOW_FEATURES, payload);
 
-    logger().debug("UserPrompt.show: result: " + aToString(payload.m_result));
+	logger().debug("UserPrompt.show: result: " + aToString(payload.m_result));
 
-    return payload.m_result;
+	return payload.m_result;
 }
